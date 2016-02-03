@@ -1,13 +1,13 @@
 import requests
-import urllib.request
 from bs4 import BeautifulSoup
 import time
 
 # temp dev variables
-file_url = 'https://cumoodle.coventry.ac.uk/pluginfile.php/1159129/mod_resource/content/1/M19COM/Worksheets/m19com_lab2_Code_Person_class.zip'
-urls = ['https://ck/ple.php', 'freak_out',
-        'https://cumoodle.coventry.ac.uk/pluginfile.php/1159129/mod_resource/content/1/M19COM/Worksheets/m19com_lab2_Code_Person_class.zip',
-        '66']
+
+# module info
+
+# hints
+downloading = 'Start downloading...It may take few minutes, depends on your network.'
 
 # Authorization
 login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
@@ -17,10 +17,26 @@ s = requests.session()
 s.post(login_action, data=user)
 
 
-def downloader(url):
-    # http://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py
+def parser(url):
+    source = s.get(url)
+    return BeautifulSoup(source.text, "html.parser")
+
+
+def check_format(url):
+    file_format = ['.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.zip']
+    last = url.split('/')[-1]
+    for fm in file_format:
+        if fm in last:
+            # good to go
+            return True
+
+
+def downloader(url, is_module_page=False):
+    # from http://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py
     local_filename = url.split('/')[-1]
     r = s.get(url, stream=True)
+    if is_module_page:
+        local_filename = 'this module page.html'
     with open(local_filename, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:  # filter out keep-alive new chunks
@@ -31,22 +47,21 @@ def downloader(url):
 def assembler():
     dead_link = 0
     global urls
-    for urls in urls:
+    for url in urls:
         try:
-            downloader(urls)
+            downloader(url)
         # handle unreachable url
-        except requests.exceptions.RequestException:
+        except requests.RequestException:
             dead_link += 1
             print(str(dead_link) + ' UNREACHABLE FILE\n' + urls + '\n')
             continue
 
 
-def get_module_info(url):
-    source = s.get(url)
-    soup = BeautifulSoup(source.text, "html.parser")
-    # locate module table, TODO: change to matrix multiplication
+def get_module_list(url):
     name_list = []
     link_list = []
+    soup = parser(url)
+    # locate module table, TODO: try to change to matrix multiplication
     i = 1
     for module in soup.find(id='current').find_all('a'):
         name = module.string
@@ -55,17 +70,45 @@ def get_module_info(url):
         i += 1
         name_list.append(name)
         link_list.append(link)
-    # print(name_list)
-    # print(link_list)
+    return name_list, link_list
 
 
-def enter_module():
-    get_module_info(my_course)
-    choice = input()
-    print(choice)
+def get_module_info():
+    # choice module
+    get = get_module_list(my_course)
+    choice = int(input(' \n Choice module number(then hit ENTER): ')) - 1
+    # TODO: try expect naughty input
+    module_link = get[1][choice]
 
-# for topic in soup.findAll('h3', {'class', 'sectionname'}):
-#     topic_name = topic.string
-#     print(topic_name)
+    # download module page
+    # downloader(module_link, True)
 
-get_module_info(my_course)
+    # preparation for getting topics & files
+    soup = parser(module_link)
+    ul = soup.find_all('ul', {'class': 'topics'})
+    ul = BeautifulSoup(str(ul), "html.parser")
+    content = ul.find_all('div', {'class': 'content'})
+    content = BeautifulSoup(str(content), "html.parser")
+
+    section_name = content.find_all('h3', {'class': 'sectionname'})
+    print(section_name)
+
+    section_img_text = content.find_all('ul', {'class': 'section img-text'})
+
+    before_dd = BeautifulSoup(str(section_img_text), "html.parser")
+    dd = before_dd.find_all('a', {'class onclick': ''})
+    for hh in dd:
+        print(hh.get('href'))
+
+
+
+    #     topic_name = topic.string
+    #     topic_list.append(topic_name)
+    #     print(topic_list[-1])
+    # topic_list.pop(0)  # remove hidden topic
+
+    # print(topic_list)
+    # print(len(topic_list))
+
+
+get_module_info()
