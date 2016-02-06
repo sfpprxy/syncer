@@ -41,7 +41,7 @@ def check_url(url):
         if ac in last:
             # good to go
             return acceptable[acceptable.index(ac) + 1]
-    return 'Not acceptable file type.'
+    return 'Not acceptable file type'
 
 
 def downloader(url, is_module_page=False):
@@ -71,7 +71,7 @@ def assembler():
             continue
 
 
-def get_module_list(url):
+def get_modules_list(url):
     name_list = []
     link_list = []
     soup = parser(url)
@@ -87,9 +87,9 @@ def get_module_list(url):
     return name_list, link_list
 
 
-def get_module_info():
+def get_module_resource():
     # choice module
-    get = get_module_list(my_course)
+    get = get_modules_list(my_course)
     choice = int(input(' \n Choice module number(then hit ENTER): ')) - 1
     # TODO: try expect naughty input, e.g. ENTER
     module_link = get[1][choice]
@@ -106,6 +106,7 @@ def get_module_info():
     contents = BeautifulSoup(str(contents), "html.parser")
 
     # '''Notice: Beautiful.content.number > moodle_html.content.number'''
+    resource = []
     for content in contents:
         content = BeautifulSoup(str(content), "html.parser")
 
@@ -119,30 +120,30 @@ def get_module_info():
         tmp = content.find_all('ul', {'class': 'section img-text'})
         tmp = BeautifulSoup(str(tmp), "html.parser")
 
-        resource = tmp.find_all('a', {'class onclick': ''})  # KEY_INFO
-        for file in resource:
-                # get file_urls
-                url = file.get('href') + '&redirect=1'
-                if '/mod/resource/' in url:  # KEY_INFO
-                    print(url)
-                # get file_names
-                if '/mod/resource/' in url:  # KEY_INFO
-                    file = BeautifulSoup(str(file), "html.parser")
+        files = tmp.find_all('a', {'class onclick': ''})  # KEY_INFO
+        for file in files:
+            # get file_urls
+            url = file.get('href') + '&redirect=1'
+            if '/mod/resource/' in url:  # KEY_INFO
+                print(url)
+            # get file_names
+            if '/mod/resource/' in url:  # KEY_INFO
+                file = BeautifulSoup(str(file), "html.parser")
 
-                    sp = file.find_all('span', {'class': 'instancename'})  # KEY_INFO
-                    sp = str(sp)
-                    start = '<span class="instancename">'
-                    end = '<span'
-                    start = sp.find(start) + len(start)
-                    end = sp.find(end, start)
-                    pure_name = sp[start:end]
+                sp = file.find_all('span', {'class': 'instancename'})  # KEY_INFO
+                sp = str(sp)
+                start = '<span class="instancename">'
+                end = '<span'
+                start = sp.find(start) + len(start)
+                end = sp.find(end, start)
+                pure_name = sp[start:end]
 
-                    img = file.find('img', {'': ''})  # KEY_INFO
-                    t = img.get('src')
-                    extension = check_url(t)
+                img = file.find('img', {'': ''})  # KEY_INFO
+                t = img.get('src')
+                extension = check_url(t)
 
-                    name = pure_name + '.' + extension
-                    print(name)
+                name = pure_name + '.' + extension
+                print(name)
 
 
 
@@ -153,4 +154,4 @@ def get_module_info():
 # u = s.get(uuu)
 # print(u.url)
 
-get_module_info()
+get_module_resource()
