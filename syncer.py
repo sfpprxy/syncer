@@ -109,12 +109,13 @@ def get_module_resource():
     resource = []
     for content in contents:
         content = BeautifulSoup(str(content), "html.parser")
+        this_topic = []
 
         # get topic_name
         tmp = content.find_all('h3', {'class': 'sectionname'})  # KEY_INFO
         for topic_name in tmp:
             topic_name = topic_name.string
-            print(topic_name)
+            this_topic.append(topic_name)
 
         # preparation: get section of each topic
         tmp = content.find_all('ul', {'class': 'section img-text'})
@@ -125,7 +126,8 @@ def get_module_resource():
             # get file_urls
             url = file.get('href') + '&redirect=1'
             if '/mod/resource/' in url:  # KEY_INFO
-                print(url)
+                this_topic.append(url)
+
             # get file_names
             if '/mod/resource/' in url:  # KEY_INFO
                 file = BeautifulSoup(str(file), "html.parser")
@@ -143,7 +145,12 @@ def get_module_resource():
                 extension = check_url(t)
 
                 name = pure_name + '.' + extension
-                print(name)
+                this_topic.append(name)
+
+    # generate one list of this module's content
+        if len(this_topic) != 0:
+            resource.append(this_topic)
+    print(resource)
 
 
 
