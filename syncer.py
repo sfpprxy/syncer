@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import re
 import time
 
 # temp dev variables
@@ -7,7 +8,8 @@ import time
 # module info
 
 # hints
-downloading = 'Start downloading...It may take few minutes, depends on your network.'
+downloading = 'Start downloading files in 3 seconds...It may take few minutes, depends on your network. ' \
+              'You can minimize this window while downloading'
 
 # Authorization
 login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
@@ -22,16 +24,28 @@ def parser(url):
     return BeautifulSoup(source.text, "html.parser")
 
 
-def check_format(url):
-    file_format = ['.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.zip']
+# def check_format(url):
+#     # file_format = ['.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.zip']
+#     file_format = ['.pdf', '.docx', '.pptx', '.xlsx', '.zip']
+#     last = url.split('/')[-1]
+#     for fm in file_format:
+#         if fm in last:
+#             # good to go
+#             return True
+
+
+def check_url(url):
+    acceptable = ['pdf', 'pdf', 'document', 'docx', 'powerpoint', 'pptx', 'spreadsheet', 'xlsx', 'archive', 'zip']
     last = url.split('/')[-1]
-    for fm in file_format:
-        if fm in last:
+    for ac in acceptable:
+        if ac in last:
             # good to go
-            return True
+            return acceptable[acceptable.index(ac) + 1]
+    return 'Not acceptable file type.'
 
 
 def downloader(url, is_module_page=False):
+    # TODO: try catch dead_url
     # from http://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py
     local_filename = url.split('/')[-1]
     r = s.get(url, stream=True)
@@ -61,7 +75,7 @@ def get_module_list(url):
     name_list = []
     link_list = []
     soup = parser(url)
-    # locate module table, TODO: try to change to matrix multiplication
+    # locate module table
     i = 1
     for module in soup.find(id='current').find_all('a'):
         name = module.string
@@ -75,40 +89,73 @@ def get_module_list(url):
 
 def get_module_info():
     # choice module
+    global pure_name, extension
     get = get_module_list(my_course)
     choice = int(input(' \n Choice module number(then hit ENTER): ')) - 1
-    # TODO: try expect naughty input
+    # TODO: try expect naughty input, e.g. ENTER
     module_link = get[1][choice]
 
     # download module page
     # downloader(module_link, True)
 
-    # preparation for getting topics & files
+    # preparation: getting topics & files
     soup = parser(module_link)
+    # TODO: extract a mini function add to parser()
     ul = soup.find_all('ul', {'class': 'topics'})
     ul = BeautifulSoup(str(ul), "html.parser")
-    content = ul.find_all('div', {'class': 'content'})
-    content = BeautifulSoup(str(content), "html.parser")
+    contents = ul.find_all('div', {'class': 'content'})
+    contents = BeautifulSoup(str(contents), "html.parser")
 
-    section_name = content.find_all('h3', {'class': 'sectionname'})
-    print(section_name)
+    # '''Inconsistency: Beautiful.content.number > moodle_html.content.number !!'''
+    for content in contents:
+        content = BeautifulSoup(str(content), "html.parser")
 
-    section_img_text = content.find_all('ul', {'class': 'section img-text'})
+        # get topic_name
+        tmp = content.find_all('h3', {'class': 'sectionname'})  # KEY_INFO
+        for topic_name in tmp:
+            topic_name = topic_name.string
+            if topic_name == 'General':  # hack
+                continue
+            print(topic_name)
 
-    before_dd = BeautifulSoup(str(section_img_text), "html.parser")
-    dd = before_dd.find_all('a', {'class onclick': ''})
-    for hh in dd:
-        print(hh.get('href'))
+        # preparation: get section of each topic
+        tmp = content.find_all('ul', {'class': 'section img-text'})
+        tmp = BeautifulSoup(str(tmp), "html.parser")
+
+        resource = tmp.find_all('a', {'class onclick': ''})  # KEY_INFO
+        for file in resource:
+                # get file_url
+                url = file.get('href') + '&redirect=1'
+                if '/mod/resource/' in url:  # KEY_INFO
+                    print(url)
+                # get file_name
+                if '/mod/resource/' in url:  # KEY_INFO
+                    file = BeautifulSoup(str(file), "html.parser")
+
+                    span = file.find_all('span', {'class': 'instancename'})  # KEY_INFO
+                    for sp in span:
+                        sp = str(sp)
+                        start = '<span class="instancename">'
+                        end = '<span'
+                        start = sp.find(start) + len(start)
+                        end = sp.find(end, start)
+                        pure_name = sp[start:end]
+
+                    img = file.find_all('img', {'': ''})  # KEY_INFO
+                    for t in img:
+                        t = t.get('src')
+                        extension = check_url(t)
+
+                    name = pure_name + '.' + extension
+                    print(name)
 
 
 
-    #     topic_name = topic.string
-    #     topic_list.append(topic_name)
-    #     print(topic_list[-1])
-    # topic_list.pop(0)  # remove hidden topic
+        # print('\n')
 
-    # print(topic_list)
-    # print(len(topic_list))
 
+# uuu = 'https://cumoodle.coventry.ac.uk/mod/resource/view.php?id=891409&redirect=1'
+# u = s.get(uuu)
+# print(u.url)
 
 get_module_info()
