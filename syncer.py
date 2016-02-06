@@ -89,16 +89,15 @@ def get_module_list(url):
 
 def get_module_info():
     # choice module
-    global pure_name, extension
     get = get_module_list(my_course)
     choice = int(input(' \n Choice module number(then hit ENTER): ')) - 1
     # TODO: try expect naughty input, e.g. ENTER
     module_link = get[1][choice]
 
     # download module page
-    # downloader(module_link, True)
+    downloader(module_link, True)
 
-    # preparation: getting topics & files
+    # preparation: locate content of this module
     soup = parser(module_link)
     # TODO: extract a mini function add to parser()
     ul = soup.find_all('ul', {'class': 'topics'})
@@ -106,7 +105,7 @@ def get_module_info():
     contents = ul.find_all('div', {'class': 'content'})
     contents = BeautifulSoup(str(contents), "html.parser")
 
-    # '''Inconsistency: Beautiful.content.number > moodle_html.content.number !!'''
+    # '''Notice: Beautiful.content.number > moodle_html.content.number'''
     for content in contents:
         content = BeautifulSoup(str(content), "html.parser")
 
@@ -114,8 +113,6 @@ def get_module_info():
         tmp = content.find_all('h3', {'class': 'sectionname'})  # KEY_INFO
         for topic_name in tmp:
             topic_name = topic_name.string
-            if topic_name == 'General':  # hack
-                continue
             print(topic_name)
 
         # preparation: get section of each topic
@@ -124,27 +121,25 @@ def get_module_info():
 
         resource = tmp.find_all('a', {'class onclick': ''})  # KEY_INFO
         for file in resource:
-                # get file_url
+                # get file_urls
                 url = file.get('href') + '&redirect=1'
                 if '/mod/resource/' in url:  # KEY_INFO
                     print(url)
-                # get file_name
+                # get file_names
                 if '/mod/resource/' in url:  # KEY_INFO
                     file = BeautifulSoup(str(file), "html.parser")
 
-                    span = file.find_all('span', {'class': 'instancename'})  # KEY_INFO
-                    for sp in span:
-                        sp = str(sp)
-                        start = '<span class="instancename">'
-                        end = '<span'
-                        start = sp.find(start) + len(start)
-                        end = sp.find(end, start)
-                        pure_name = sp[start:end]
+                    sp = file.find_all('span', {'class': 'instancename'})  # KEY_INFO
+                    sp = str(sp)
+                    start = '<span class="instancename">'
+                    end = '<span'
+                    start = sp.find(start) + len(start)
+                    end = sp.find(end, start)
+                    pure_name = sp[start:end]
 
-                    img = file.find_all('img', {'': ''})  # KEY_INFO
-                    for t in img:
-                        t = t.get('src')
-                        extension = check_url(t)
+                    img = file.find('img', {'': ''})  # KEY_INFO
+                    t = img.get('src')
+                    extension = check_url(t)
 
                     name = pure_name + '.' + extension
                     print(name)
