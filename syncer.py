@@ -12,8 +12,10 @@ downloading = 'Start downloading files in 3 seconds...It may take few minutes, d
               'You can minimize this window while downloading'
 
 # Authorization
+username = 'cuiq4'
+password = 'Cucu.109'
 login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
-user = {'username': 'cuiq4', 'password': 'Cucu.109'}
+user = {'username': username, 'password': password}
 my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
 s = requests.session()
 s.post(login_action, data=user)
@@ -24,59 +26,12 @@ def parser(url):
     return BeautifulSoup(source.text, "html.parser")
 
 
-# def check_format(url):
-#     # file_format = ['.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.zip']
-#     file_format = ['.pdf', '.docx', '.pptx', '.xlsx', '.zip']
-#     last = url.split('/')[-1]
-#     for fm in file_format:
-#         if fm in last:
-#             # good to go
-#             return True
-
-
-def check_url(url):
-    acceptable = ['pdf', 'pdf', 'document', 'docx', 'powerpoint', 'pptx', 'spreadsheet', 'xlsx', 'archive', 'zip']
-    last = url.split('/')[-1]
-    for ac in acceptable:
-        if ac in last:
-            # good to go
-            return acceptable[acceptable.index(ac) + 1]
-    return 'Not acceptable file type'
-
-
-def downloader(url, is_module_page=False):
-    # TODO: try catch dead_url
-    # from http://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py
-    local_filename = url.split('/')[-1]
-    r = s.get(url, stream=True)
-    if is_module_page:
-        local_filename = 'this module page.html'
-    with open(local_filename, 'wb') as f:
-        for chunk in r.iter_content(chunk_size=1024):
-            if chunk:  # filter out keep-alive new chunks
-                f.write(chunk)
-    return local_filename
-
-
-def assembler():
-    dead_link = 0
-    global urls
-    for url in urls:
-        try:
-            downloader(url)
-        # handle unreachable url
-        except requests.RequestException:
-            dead_link += 1
-            print(str(dead_link) + ' UNREACHABLE FILE\n' + urls + '\n')
-            continue
-
-
 def get_modules_list(url):
     name_list = []
     link_list = []
     soup = parser(url)
-    # locate module table
     i = 1
+    # locate module table
     for module in soup.find(id='current').find_all('a'):
         name = module.string
         link = module.get('href')
@@ -153,8 +108,44 @@ def get_module_resource():
     print(resource)
 
 
+def check_url(url):
+    acceptable = ['pdf', 'pdf', 'document', 'docx', 'powerpoint', 'pptx', 'spreadsheet', 'xlsx', 'archive', 'zip']
+    last = url.split('/')[-1]
+    for ac in acceptable:
+        if ac in last:
+            # good to go
+            return acceptable[acceptable.index(ac) + 1]
+    return 'Not acceptable file type'
 
-        # print('\n')
+
+def downloader(url, is_module_page=False):
+    # TODO: try catch dead_url
+    # from http://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py
+    local_filename = url.split('/')[-1]
+    r = s.get(url, stream=True)
+    if is_module_page:
+        local_filename = 'this module page.html'
+    with open(local_filename, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=1024):
+            if chunk:  # filter out keep-alive new chunks
+                f.write(chunk)
+    return local_filename
+
+
+def assembler():
+    dead_link = 0
+    global urls
+    for url in urls:
+        try:
+            downloader(url)
+        # handle unreachable url
+        except requests.RequestException:
+            dead_link += 1
+            print(str(dead_link) + ' UNREACHABLE FILE\n' + urls + '\n')
+            continue
+
+
+
 
 
 # uuu = 'https://cumoodle.coventry.ac.uk/mod/resource/view.php?id=891409&redirect=1'
