@@ -95,9 +95,18 @@ def get_module_resource():
                 end = sp.find(end, start)
                 pure_name = sp[start:end]
 
+                def check(link):
+                    acceptable = ['pdf', 'pdf', 'document', 'docx', 'powerpoint', 'pptx',
+                                  'spreadsheet', 'xlsx', 'archive', 'zip']
+                    last = link.split('/')[-1]
+                    for ac in acceptable:
+                        if ac in last:
+                            return acceptable[acceptable.index(ac) + 1]
+                    return 'Not acceptable file type'
+
                 img = file.find('img', {'': ''})  # KEY_INFO
                 t = img.get('src')
-                extension = check_url(t)
+                extension = check(t)
 
                 name = pure_name + '.' + extension
                 this_topic.append(name)
@@ -106,16 +115,7 @@ def get_module_resource():
         if len(this_topic) != 0:
             resource.append(this_topic)
     print(resource)
-
-
-def check_url(url):
-    acceptable = ['pdf', 'pdf', 'document', 'docx', 'powerpoint', 'pptx', 'spreadsheet', 'xlsx', 'archive', 'zip']
-    last = url.split('/')[-1]
-    for ac in acceptable:
-        if ac in last:
-            # good to go
-            return acceptable[acceptable.index(ac) + 1]
-    return 'Not acceptable file type'
+    return resource
 
 
 def downloader(url, is_module_page=False):
@@ -132,9 +132,8 @@ def downloader(url, is_module_page=False):
     return local_filename
 
 
-def assembler():
+def old_assembler(urls):
     dead_link = 0
-    global urls
     for url in urls:
         try:
             downloader(url)
@@ -145,6 +144,16 @@ def assembler():
             continue
 
 
+def assembler(urls):
+    dead_link = 0
+    for url in urls:
+        try:
+            downloader(url)
+        # handle unreachable url
+        except requests.RequestException:
+            dead_link += 1
+            print(str(dead_link) + ' UNREACHABLE FILE\n' + urls + '\n')
+            continue
 
 
 
