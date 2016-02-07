@@ -53,7 +53,7 @@ def get_module_resource():
     module_name = a[0]
     module_link = a[1]
     soup = parser(module_link)
-    # TODO: extract a mini function add to parser()
+    # TODO later: extract a mini function add to parser()
     ul = soup.find_all('ul', {'class': 'topics'})
     ul = BeautifulSoup(str(ul), "html.parser")
     contents = ul.find_all('div', {'class': 'content'})
@@ -121,7 +121,7 @@ def get_module_resource():
 
 
 def downloader(url, path, file_name):
-    # TODO: try catch dead_url
+    # TODO later: try catch dead_url
     # from http://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py
     r = s.get(url, stream=True)
     with open(os.path.join(path, file_name), 'wb') as f:
@@ -167,12 +167,15 @@ def assembler():
 
                 file_name = sub_list[index + 2]
                 file_name = convert_error_name(file_name)
-                print('downloading...', file_name)
 
                 file_path = os.path.join(dist)
 
-                # TODO: exclude existing files
-                downloader(file_url, file_path, file_name)
+                # sync
+                if not os.path.isfile(os.path.join(file_path, file_name)):
+                    print('downloading....', file_name)
+                    downloader(file_url, file_path, file_name)
+                else:
+                    print('file existed...', file_name)
 
 # Welcome
 author = 'Joe Cui, study in Software Engineering. Email: cuiq4@uni.coventry.ac.uk'
