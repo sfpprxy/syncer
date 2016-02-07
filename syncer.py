@@ -1,24 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import os
-import time
-
-# temp dev variables
-
-# module info
-
-# hints
-downloading = 'Start downloading files in 3 seconds...It may take a minute, depends on your network. ' \
-              'You can minimize this window while downloading'
-
-# Authorization
-username = 'cuiq4'
-password = 'Cucu.109'
-login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
-user = {'username': username, 'password': password}
-my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
-s = requests.session()
-s.post(login_action, data=user)
 
 
 def parser(url):
@@ -31,11 +13,12 @@ def get_modules_list(url):
     link_list = []
     soup = parser(url)
     i = 1
+    print(0, '  ', 'Contact author')
     # locate module table
     for module in soup.find(id='current').find_all('a'):
         name = module.string
         link = module.get('href')
-        print(i, name)
+        print(i, '  ', name)
         i += 1
         name_list.append(name)
         link_list.append(link)
@@ -44,13 +27,31 @@ def get_modules_list(url):
 
 def get_module_resource():
     # choice module
-    get = get_modules_list(my_course)
-    choice = int(input(' \n Choice module number(then hit ENTER): ')) - 1
-    # TODO: try expect naughty input, e.g. ENTER
-    module_name = get[0][choice]
-    module_link = get[1][choice]
+    def choice_module():
+        get = get_modules_list(my_course)
+        i = 0
+        for _ in range(16):
+            i += 1
+            try:
+                choice = int(input(ask)) - 1
+                if choice == -1:
+                    print(author)
+                elif choice in range(len(get[0])):
+                    module = get[0][choice]
+                    link = get[1][choice]
+                    input(confirm)
+                    return module, link
+                else:
+                    print(don)
+            except ValueError:
+                print(don)
+            if i == 16:
+                print(egg)
 
     # preparation: locate content of this module
+    a = choice_module()
+    module_name = a[0]
+    module_link = a[1]
     soup = parser(module_link)
     # TODO: extract a mini function add to parser()
     ul = soup.find_all('ul', {'class': 'topics'})
@@ -113,10 +114,9 @@ def get_module_resource():
                     name = 'Hidden file on Moodle' + '.' + extension
                     this_topic.append(name)
 
-    # generate one list of this module's content
+    # generate ONE list of this module's content
         if len(this_topic) != 0:
             resource.append(this_topic)
-    print(resource)
     return module_name, module_link, resource
 
 
@@ -129,18 +129,6 @@ def downloader(url, path, file_name):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
     return file_name
-
-
-def old_assembler(urls):
-    dead_link = 0
-    for url in urls:
-        try:
-            downloader(url)
-        # handle unreachable url
-        except requests.RequestException:
-            dead_link += 1
-            print(str(dead_link) + ' UNREACHABLE FILE\n' + urls + '\n')
-            continue
 
 
 def assembler():
@@ -176,28 +164,34 @@ def assembler():
             index = sub_list[1:].index(file)
             if index % 2 == 0:
                 file_url = file
-                print('file_url', file_url)
 
                 file_name = sub_list[index + 2]
                 file_name = convert_error_name(file_name)
-                print('file_name', file_name)
+                print('downloading...', file_name)
 
                 file_path = os.path.join(dist)
-                print(file_path)
 
+                # TODO: exclude existing files
                 downloader(file_url, file_path, file_name)
 
+# Welcome
+author = 'Joe Cui, study in Software Engineering. Email: cuiq4@uni.coventry.ac.uk'
 
+# hints
+ask = '\nChoice module number(then hit ENTER): '
+confirm = '\nDownloading files will take a minute, depends on your network. ' \
+          'You can minimize this window while downloading. \n\nPress ENTER again to start: '
+egg = '\n...gnihsarc ggE\n): laem a uoy yub lliw I em tcatnoc ,gge retsaE eht dnif uoY !woW\n'[::-1]
+don = "Don't be too curious ;)"
 
-
-
-
-
-
-
-
-# uuu = 'https://cumoodle.coventry.ac.uk/mod/resource/view.php?id=891409&redirect=1'
-# u = s.get(uuu)
-# print(u.url)
+# Authorization
+# TODO: custom login, save user
+username = 'cuiq4'
+password = 'Cucu.109'
+login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
+user = {'username': username, 'password': password}
+my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
+s = requests.session()
+s.post(login_action, data=user)
 
 assembler()
