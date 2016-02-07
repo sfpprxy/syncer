@@ -8,7 +8,7 @@ import time
 # module info
 
 # hints
-downloading = 'Start downloading files in 3 seconds...It may take few minutes, depends on your network. ' \
+downloading = 'Start downloading files in 3 seconds...It may take a minute, depends on your network. ' \
               'You can minimize this window while downloading'
 
 # Authorization
@@ -50,9 +50,6 @@ def get_module_resource():
     module_name = get[0][choice]
     module_link = get[1][choice]
 
-    # download module page
-    downloader(module_link, True)
-
     # preparation: locate content of this module
     soup = parser(module_link)
     # TODO: extract a mini function add to parser()
@@ -91,7 +88,7 @@ def get_module_resource():
                 sp = file.find_all('span', {'class': 'instancename'})  # KEY_INFO
                 sp = str(sp)
                 start = '<span class="instancename">'
-                end = '<span'
+                end = '<'
                 start = sp.find(start) + len(start)
                 end = sp.find(end, start)
                 pure_name = sp[start:end]
@@ -103,34 +100,36 @@ def get_module_resource():
                     for ac in acceptable:
                         if ac in last:
                             return acceptable[acceptable.index(ac) + 1]
-                    return 'Not acceptable file type'
+                    return 'Unknown file type'
 
                 img = file.find('img', {'': ''})  # KEY_INFO
-                t = img.get('src')
-                extension = check(t)
-
-                name = pure_name + '.' + extension
-                this_topic.append(name)
+                try:
+                    t = img.get('src')
+                    extension = check(t)
+                    name = pure_name + '.' + extension
+                    this_topic.append(name)
+                except AttributeError:
+                    print('Fuck!')
+                    extension = 'Unknown file'
+                    name = 'Hidden file on Moodle' + '.' + extension
+                    this_topic.append(name)
 
     # generate one list of this module's content
         if len(this_topic) != 0:
             resource.append(this_topic)
     print(resource)
-    return module_name, resource
+    return module_name, module_link, resource
 
 
-def downloader(url, is_module_page=False):
+def downloader(url, path, file_name):
     # TODO: try catch dead_url
     # from http://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py
-    local_filename = url.split('/')[-1]
     r = s.get(url, stream=True)
-    if is_module_page:
-        local_filename = 'this module page.html'
-    with open(local_filename, 'wb') as f:
+    with open(os.path.join(path, file_name), 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
-    return local_filename
+    return file_name
 
 
 def old_assembler(urls):
@@ -145,7 +144,6 @@ def old_assembler(urls):
             continue
 
 
-# TODO: two-layer loops: inside iterate each file in[[]], outside iterate each topic in[]
 def assembler():
     data = get_module_resource()
 
@@ -153,29 +151,37 @@ def assembler():
     module_name = data[0]
     if not os.path.exists(module_name):
         os.makedirs(module_name)
-    # else:
-    #   TODO: download files into existing module_folder
 
-    resource = data[1]
+    downloader(data[1], module_name, 'This module page.html')
+
+    resource = data[2]
     for i in resource:
         sub_list = resource[resource.index(i)]
 
         # create topic folder
         folder_name = sub_list[0]
-        print(folder_name)
         dist = os.path.join(module_name, folder_name)
-        os.makedirs(dist)
+        if not os.path.exists(dist):
+            os.makedirs(dist)
 
         # download files into folder
         for file in sub_list[1:]:
-            if sub_list[1:].index(file) % 2 == 0:
+            index = sub_list[1:].index(file)
+            if index % 2 == 0:
                 file_url = file
-                print(file_url)
-            else:
-                file_name = file
-                print(file_name)
-        # TODO: download file
+                print('file_url', file_url)
 
+                file_name = sub_list[index + 2]
+                error = ['/', '|', '"', ':', '?', '*', '<', '>']
+                for x in error:
+                    if x in file_name:
+                        file_name = file_name.replace(x, ' ')
+                print('file_name', file_name)
+
+                file_path = os.path.join(dist)
+                print(file_path)
+
+                downloader(file_url, file_path, file_name)
 
 
 
