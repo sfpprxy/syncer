@@ -26,36 +26,36 @@ def get_modules_list(url):
 
 
 def get_module_resource():
-    # choice module
     def choice_module():
         get = get_modules_list(my_course)
-        i = 0
         u = 0
+        hit = 0
         for _ in range(16):
-            try:
-                choice = int(input(ask)) - 1
-                if choice == -1:
-                    u += 1
-                    print(author)
-                    if u == 16:
-                        print(egg)
-                elif choice in range(len(get[0])):
-                    module = get[0][choice]
-                    link = get[1][choice]
-                    input(confirm)
-                    return module, link
-                else:
-                    i += 1
-                    print(whoops)
-            except ValueError:
-                i += 1
+            def hint():
+                nonlocal hit
+                hit += 1
+                i = hit
                 if i == 1:
                     print(whoops)
                 if i == 2:
                     print(please)
                 if 2 < i < 16:
                     print(don)
-            if i == 16:
+            try:
+                choice = int(input(ask)) - 1
+                if choice == -1:
+                    u += 1
+                    print(author)
+                elif choice in range(len(get[0])):
+                    module = get[0][choice]
+                    link = get[1][choice]
+                    input(confirm)
+                    return module, link
+                else:
+                    hint()
+            except ValueError:
+                    hint()
+            if hit + u == 16:
                 print(egg)
 
     # preparation: locate content of this module
@@ -192,12 +192,12 @@ author = 'Joe Cui, study in Software Engineering. Email: cuiq4@uni.coventry.ac.u
 
 # hints
 ask = '\nChoice module number(then hit ENTER): '
-confirm = '\nDownloading files will take a minute, depends on your network. ' \
-          'You can minimize this window while syncing. \n\nPress ENTER again to start: '
-egg = '\n...gnihsarc ggE\n): laem a uoy yub lliw I em tcatnoc ,gge retsaE eht dnif uoY !woW\n'[::-1]
 whoops = 'Whoops! It seems you input the wrong character.'
 please = 'Please input numbers in range :)'
 don = "Don't be too curious ;)"
+egg = '\n...gnihsarc ggE\n): laem a uoy yub lliw I em tcatnoc ,gge retsaE eht dnif uoY !woW\n'[::-1]
+confirm = '\nDownloading files will take a minute, depends on your network. ' \
+          'You can minimize this window while syncing. \n\nPress ENTER again to start: '
 
 # Authorization
 # TODO: custom login, save user
@@ -210,3 +210,4 @@ s = requests.session()
 s.post(login_action, data=user)
 
 assembler()
+
