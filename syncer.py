@@ -161,7 +161,7 @@ def assembler():
             error = ['/', '|', '"', ':', '?', '*', '<', '>']
             for x in error:
                 if x in name:
-                    name = name.replace(x, ' ')
+                    name = name.replace(x, '')
             return name
 
         # create topic folder
