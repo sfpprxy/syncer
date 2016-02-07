@@ -109,7 +109,6 @@ def get_module_resource():
                     name = pure_name + '.' + extension
                     this_topic.append(name)
                 except AttributeError:
-                    print('Fuck!')
                     extension = 'Unknown file'
                     name = 'Hidden file on Moodle' + '.' + extension
                     this_topic.append(name)
@@ -158,8 +157,16 @@ def assembler():
     for i in resource:
         sub_list = resource[resource.index(i)]
 
+        def convert_error_name(name):
+            error = ['/', '|', '"', ':', '?', '*', '<', '>']
+            for x in error:
+                if x in name:
+                    name = name.replace(x, ' ')
+            return name
+
         # create topic folder
         folder_name = sub_list[0]
+        folder_name = convert_error_name(folder_name)
         dist = os.path.join(module_name, folder_name)
         if not os.path.exists(dist):
             os.makedirs(dist)
@@ -172,10 +179,7 @@ def assembler():
                 print('file_url', file_url)
 
                 file_name = sub_list[index + 2]
-                error = ['/', '|', '"', ':', '?', '*', '<', '>']
-                for x in error:
-                    if x in file_name:
-                        file_name = file_name.replace(x, ' ')
+                file_name = convert_error_name(file_name)
                 print('file_name', file_name)
 
                 file_path = os.path.join(dist)
