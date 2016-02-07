@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-import re
+import os
 import time
 
 # temp dev variables
@@ -47,6 +47,7 @@ def get_module_resource():
     get = get_modules_list(my_course)
     choice = int(input(' \n Choice module number(then hit ENTER): ')) - 1
     # TODO: try expect naughty input, e.g. ENTER
+    module_name = get[0][choice]
     module_link = get[1][choice]
 
     # download module page
@@ -115,7 +116,7 @@ def get_module_resource():
         if len(this_topic) != 0:
             resource.append(this_topic)
     print(resource)
-    return resource
+    return module_name, resource
 
 
 def downloader(url, is_module_page=False):
@@ -144,16 +145,44 @@ def old_assembler(urls):
             continue
 
 
-def assembler(urls):
-    dead_link = 0
-    for url in urls:
-        try:
-            downloader(url)
-        # handle unreachable url
-        except requests.RequestException:
-            dead_link += 1
-            print(str(dead_link) + ' UNREACHABLE FILE\n' + urls + '\n')
-            continue
+# TODO: two-layer loops: inside iterate each file in[[]], outside iterate each topic in[]
+def assembler():
+    data = get_module_resource()
+
+    # create module folder
+    module_name = data[0]
+    if not os.path.exists(module_name):
+        os.makedirs(module_name)
+    # else:
+    #   TODO: download files into existing module_folder
+
+    resource = data[1]
+    for i in resource:
+        sub_list = resource[resource.index(i)]
+
+        # create topic folder
+        folder_name = sub_list[0]
+        print(folder_name)
+        dist = os.path.join(module_name, folder_name)
+        os.makedirs(dist)
+
+        # download files into folder
+        for file in sub_list[1:]:
+            if sub_list[1:].index(file) % 2 == 0:
+                file_url = file
+                print(file_url)
+            else:
+                file_name = file
+                print(file_name)
+        # TODO: download file
+
+
+
+
+
+
+
+
 
 
 
@@ -161,4 +190,4 @@ def assembler(urls):
 # u = s.get(uuu)
 # print(u.url)
 
-get_module_resource()
+assembler()
