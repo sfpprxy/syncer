@@ -3,6 +3,55 @@ from bs4 import BeautifulSoup
 import os
 
 
+def welcome():
+    print(intro + make_clear + suggest + login_hint)
+
+
+def login():
+    def input_user_info():
+        global username, password
+        username = input('\nEnter your Moodle username:')
+        password = input('Enter your Moodle password:')
+        if username == '' or password == '':
+            print('They can not be empty, please try again.')
+            input_user_info()
+
+    def save_user_info():
+        with open(profile, 'w') as p:
+            p.write(username + '\n' + password)
+
+    def read_user_info():
+        global username, password
+        with open(profile) as p:
+            data = p.read().splitlines()
+        username = data[0]
+        password = data[1]
+
+    def authorization():
+        user = {'username': username, 'password': password}
+        login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
+        global s
+        s = requests.session()
+        return s.post(login_action, data=user)
+
+    if os.path.isfile(profile):  # not first time use
+        read_user_info()
+    else:  # first time use
+        input_user_info()
+
+    # do not know if username and password is correct yet
+    print('Connecting to Moodle...')
+
+    if 'Log in to the site' in authorization().text:  # login fail
+        print('\nWrong username or password, please try again.')
+        input_user_info()
+        save_user_info()
+        login()
+    else:  # username and password correct, login success
+        print('\nLogin success!\n')
+        save_user_info()
+
+
 def parser(url):
     source = s.get(url)
     return BeautifulSoup(source.text, "html.parser")
@@ -188,6 +237,7 @@ def assembler():
                 else:
                     print('file existed...', file_name)
 
+
 # Welcome
 author = 'Joe Cui, study in Software Engineering. Email: cuiq4@uni.coventry.ac.uk'
 intro = '\nHi there, this tool can automatically download/sync resources on Moodle ' \
@@ -215,54 +265,11 @@ username = ''
 password = ''
 
 
-def input_user_info():
-    global username, password
-    username = input('Enter your Moodle username:')
-    password = input('Enter your Moodle password:')
-    if username == '' or password == '':
-        print('They can not be empty, please try again.')
-        input_user_info()
+def main():
+    welcome()
+    login()
+    assembler()
 
+# init program
+main()
 
-def save_user_info():
-    with open(profile, 'w') as p:
-        p.write(username + '\n' + password)
-
-
-def read_user_info():
-    global username, password
-    with open(profile) as p:
-        data = p.read().splitlines()
-    username = data[0]
-    password = data[1]
-
-
-def authorization():
-    user = {'username': username, 'password': password}
-    login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
-    global s
-    s = requests.session()
-    return s.post(login_action, data=user)
-
-
-def login():
-    if os.path.isfile(profile):  # not first time use
-        read_user_info()
-    else:  # first time use
-        input_user_info()
-
-    # do not know if username and password is correct yet
-
-    if 'Log in to the site' in authorization().text:  # login fail
-        print('Wrong username or password, please try again.')
-        input_user_info()
-        save_user_info()
-        login()
-    else:  # username and password correct, login success
-        print('\nLogin success!\n')
-        save_user_info()
-
-
-print(intro + make_clear + suggest + login_hint)
-login()
-assembler()
