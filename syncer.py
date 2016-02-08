@@ -190,6 +190,12 @@ def assembler():
 
 # Welcome
 author = 'Joe Cui, study in Software Engineering. Email: cuiq4@uni.coventry.ac.uk'
+intro = '\nHi there, this tool can automatically download/sync resources on Moodle ' \
+          'and organize them in a clear way for you.\nIn a word, save you bunch of time!'
+make_clear = '\n\nThis tool will NOT collect any of your personal information.' \
+             '\nYou can see the source code at https://github.com/sfpprxy/syncer'
+suggest = '\nIf you have any questions or suggestions, feel free to contact me :)\n'
+login_hint = '\nYou only need to login once, after that this tool will remember the password for you.'
 
 # hints
 ask = '\nChoice module number(then hit ENTER): '
@@ -204,7 +210,6 @@ confirm = '\nDownloading files will take a minute, depends on your network. ' \
 my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
 
 # Authorization
-# TODO: custom login, save user
 profile = 'profile'
 username = ''
 password = ''
@@ -212,8 +217,8 @@ password = ''
 
 def input_user_info():
     global username, password
-    username = input('username:')
-    password = input('password:')
+    username = input('Enter your Moodle username:')
+    password = input('Enter your Moodle password:')
     if username == '' or password == '':
         print('They can not be empty, please try again.')
         input_user_info()
@@ -254,9 +259,10 @@ def login():
         save_user_info()
         login()
     else:  # username and password correct, login success
+        print('\nLogin success!\n')
         save_user_info()
-        print('Login success!\n')
-        assembler()
 
 
+print(intro + make_clear + suggest + login_hint)
 login()
+assembler()
