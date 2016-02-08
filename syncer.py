@@ -1,6 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+import sys
+
+
+def set_cwd():
+    exe_path = os.path.realpath(os.path.dirname(sys.argv[0]))
+    os.chdir(exe_path)
+    a = os.getcwd()
+    print(a)
 
 
 def welcome():
@@ -266,6 +274,8 @@ password = ''
 
 
 def main():
+    # TODO: set cwd to exe_real_path, test on Windows
+    set_cwd()
     welcome()
     login()
     assembler()
