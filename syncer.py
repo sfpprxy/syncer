@@ -3,6 +3,55 @@ from bs4 import BeautifulSoup
 import os
 
 
+def welcome():
+    print(intro + make_clear + suggest + login_hint)
+
+
+def login():
+    def input_user_info():
+        global username, password
+        username = input('\nEnter your Moodle username:')
+        password = input('Enter your Moodle password:')
+        if username == '' or password == '':
+            print('They can not be empty, please try again.')
+            input_user_info()
+
+    def save_user_info():
+        with open(profile, 'w') as p:
+            p.write(username + '\n' + password)
+
+    def read_user_info():
+        global username, password
+        with open(profile) as p:
+            data = p.read().splitlines()
+        username = data[0]
+        password = data[1]
+
+    def authorization():
+        user = {'username': username, 'password': password}
+        login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
+        global s
+        s = requests.session()
+        return s.post(login_action, data=user)
+
+    if os.path.isfile(profile):  # not first time use
+        read_user_info()
+    else:  # first time use
+        input_user_info()
+
+    # do not know if username and password is correct yet
+    print('Connecting to Moodle...')
+
+    if 'Log in to the site' in authorization().text:  # login fail
+        print('\nWrong username or password, please try again.')
+        input_user_info()
+        save_user_info()
+        login()
+    else:  # username and password correct, login success
+        print('\nLogin success!\n')
+        save_user_info()
+
+
 def parser(url):
     source = s.get(url)
     return BeautifulSoup(source.text, "html.parser")
@@ -26,15 +75,25 @@ def get_modules_list(url):
 
 
 def get_module_resource():
-    # choice module
     def choice_module():
         get = get_modules_list(my_course)
-        i = 0
+        u = 0
+        hit = 0
         for _ in range(16):
-            i += 1
+            def hint():
+                nonlocal hit
+                hit += 1
+                i = hit
+                if i == 1:
+                    print(whoops)
+                if i == 2:
+                    print(please)
+                if 2 < i < 16:
+                    print(don)
             try:
                 choice = int(input(ask)) - 1
                 if choice == -1:
+                    u += 1
                     print(author)
                 elif choice in range(len(get[0])):
                     module = get[0][choice]
@@ -42,10 +101,10 @@ def get_module_resource():
                     input(confirm)
                     return module, link
                 else:
-                    print(don)
+                    hint()
             except ValueError:
-                print(don)
-            if i == 16:
+                    hint()
+            if hit + u == 16:
                 print(egg)
 
     # preparation: locate content of this module
@@ -139,7 +198,8 @@ def assembler():
     if not os.path.exists(module_name):
         os.makedirs(module_name)
 
-    downloader(data[1], module_name, 'This module page.html')
+    module_link = data[1]
+    downloader(module_link, module_name, 'This module page.html')
 
     resource = data[2]
     for i in resource:
@@ -177,24 +237,39 @@ def assembler():
                 else:
                     print('file existed...', file_name)
 
+
 # Welcome
 author = 'Joe Cui, study in Software Engineering. Email: cuiq4@uni.coventry.ac.uk'
+intro = '\nHi there, this tool can automatically download/sync resources on Moodle ' \
+          'and organize them in a clear way for you.\nIn a word, save you bunch of time!'
+make_clear = '\n\nThis tool will NOT collect any of your personal information.' \
+             '\nYou can see the source code at https://github.com/sfpprxy/syncer'
+suggest = '\nIf you have any questions or suggestions, feel free to contact me :)\n'
+login_hint = '\nYou only need to login once, after that this tool will remember the password for you.'
 
 # hints
 ask = '\nChoice module number(then hit ENTER): '
-confirm = '\nDownloading files will take a minute, depends on your network. ' \
-          'You can minimize this window while downloading. \n\nPress ENTER again to start: '
-egg = '\n...gnihsarc ggE\n): laem a uoy yub lliw I em tcatnoc ,gge retsaE eht dnif uoY !woW\n'[::-1]
+whoops = 'Whoops! It seems you input the wrong character.'
+please = 'Please input numbers in range :)'
 don = "Don't be too curious ;)"
+egg = '\n...gnihsarc ggE\n): laem a uoy yub lliw I em tcatnoc ,gge retsaE eht dnif uoY !woW\n'[::-1]
+confirm = '\nDownloading files will take a minute, depends on your network. ' \
+          'You can minimize this window while syncing. \n\nPress ENTER again to start: '
+
+# profile
+my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
 
 # Authorization
-# TODO: custom login, save user
-username = 'cuiq4'
-password = 'Cucu.109'
-login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
-user = {'username': username, 'password': password}
-my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
-s = requests.session()
-s.post(login_action, data=user)
+profile = 'profile'
+username = ''
+password = ''
 
-assembler()
+
+def main():
+    welcome()
+    login()
+    assembler()
+
+# init program
+main()
+
