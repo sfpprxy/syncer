@@ -149,7 +149,8 @@ def assembler():
     if not os.path.exists(module_name):
         os.makedirs(module_name)
 
-    downloader(data[1], module_name, 'This module page.html')
+    module_link = data[1]
+    downloader(module_link, module_name, 'This module page.html')
 
     resource = data[2]
     for i in resource:
@@ -199,15 +200,63 @@ egg = '\n...gnihsarc ggE\n): laem a uoy yub lliw I em tcatnoc ,gge retsaE eht dn
 confirm = '\nDownloading files will take a minute, depends on your network. ' \
           'You can minimize this window while syncing. \n\nPress ENTER again to start: '
 
+# profile
+my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
+
 # Authorization
 # TODO: custom login, save user
-username = 'cuiq4'
-password = 'Cucu.109'
-login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
-user = {'username': username, 'password': password}
-my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
-s = requests.session()
-s.post(login_action, data=user)
+profile = 'profile'
+username = ''
+password = ''
 
-assembler()
 
+def input_user_info():
+    global username, password
+    username = input('username:')
+    password = input('password:')
+    if username == '' or password == '':
+        print('They can not be empty, please try again.')
+        input_user_info()
+
+
+def save_user_info():
+    with open(profile, 'w') as p:
+        p.write(username + '\n' + password)
+
+
+def read_user_info():
+    global username, password
+    with open(profile) as p:
+        data = p.read().splitlines()
+    username = data[0]
+    password = data[1]
+
+
+def authorization():
+    user = {'username': username, 'password': password}
+    login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
+    global s
+    s = requests.session()
+    return s.post(login_action, data=user)
+
+
+def login():
+    if os.path.isfile(profile):  # not first time use
+        read_user_info()
+    else:  # first time use
+        input_user_info()
+
+    # do not know if username and password is correct yet
+
+    if 'Log in to the site' in authorization().text:  # login fail
+        print('Wrong username or password, please try again.')
+        input_user_info()
+        save_user_info()
+        login()
+    else:  # username and password correct, login success
+        save_user_info()
+        print('Login success!\n')
+        assembler()
+
+
+login()
