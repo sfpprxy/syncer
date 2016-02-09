@@ -8,8 +8,11 @@ In a word, save you bunch of time!
 
 P.S. In most case it is self-contained, if you can not open it.    
 Just install the runtime environment: [https://www.python.org/ftp/python/3.5.1/python-3.5.1.exe](https://www.python.org/ftp/python/3.5.1/python-3.5.1.exe)  It is very small.
-#### Mac & Linux
+#### Mac
 [https://sourceforge.net/projects/covsyncer/](https://sourceforge.net/projects/covsyncer/)    
+    
+P.S. You may change the System Preference - Security & Privacy - Allow apps downloaded from to ‘Anywhere’
+![](https://raw.githubusercontent.com/sfpprxy/syncer/dev/mac-config.png)
 
 ## How to use
 Just throw the executable file into a new folder then run it. And that's it.
