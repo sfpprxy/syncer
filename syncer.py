@@ -1,6 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+import sys
+import time
+
+
+def set_cwd():
+    exe_path = os.path.realpath(os.path.dirname(sys.argv[0]))
+    os.chdir(exe_path)
 
 
 def welcome():
@@ -29,7 +36,6 @@ def login():
 
     def authorization():
         user = {'username': username, 'password': password}
-        login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
         global s
         s = requests.session()
         return s.post(login_action, data=user)
@@ -104,8 +110,10 @@ def get_module_resource():
                     hint()
             except ValueError:
                     hint()
-            if hit + u == 16:
+            if hit + u == 15:
                 print(egg)
+                time.sleep(3)
+                exit()
 
     # preparation: locate content of this module
     a = choice_module()
@@ -128,6 +136,8 @@ def get_module_resource():
         tmp = content.find_all('h3', {'class': 'sectionname'})  # KEY_INFO
         for topic_name in tmp:
             topic_name = topic_name.string
+            if topic_name[-1] == ' ':  # convert unacceptable topic_name for Windows
+                topic_name = topic_name[:-1]
             this_topic.append(topic_name)
 
         # preparation: get section of each topic
@@ -190,6 +200,7 @@ def downloader(url, path, file_name):
     return file_name
 
 
+# Sync resources and organize them properly
 def assembler():
     data = get_module_resource()
 
@@ -238,38 +249,46 @@ def assembler():
                     print('file existed...', file_name)
 
 
+def finish():
+    where = os.getcwd()
+    print('\nJob done!')
+    print('\nYou can find a module folder in ' + where + ' and your password is saved in profile.')
+    print('Exiting program in 10 seconds...')
+    time.sleep(10)
+
+
 # Welcome
-author = 'Joe Cui, study in Software Engineering. Email: cuiq4@uni.coventry.ac.uk'
-intro = '\nHi there, this tool can automatically download/sync resources on Moodle ' \
+author = 'Joe Cui, study in Software Development. Email: cuiq4@uni.coventry.ac.uk'
+intro = '\nHi there, this is a simple tool that can automatically download/sync resources from Moodle ' \
           'and organize them in a clear way for you.\nIn a word, save you bunch of time!'
 make_clear = '\n\nThis tool will NOT collect any of your personal information.' \
              '\nYou can see the source code at https://github.com/sfpprxy/syncer'
 suggest = '\nIf you have any questions or suggestions, feel free to contact me :)\n'
 login_hint = '\nYou only need to login once, after that this tool will remember the password for you.'
 
-# hints
+# Hints
 ask = '\nChoice module number(then hit ENTER): '
 whoops = 'Whoops! It seems you input the wrong character.'
 please = 'Please input numbers in range :)'
 don = "Don't be too curious ;)"
 egg = '\n...gnihsarc ggE\n): laem a uoy yub lliw I em tcatnoc ,gge retsaE eht dnif uoY !woW\n'[::-1]
 confirm = '\nDownloading files will take a minute, depends on your network. ' \
-          'You can minimize this window while syncing. \n\nPress ENTER again to start: '
-
-# profile
-my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
+          'You can minimize this window while downloading. \n\nPress ENTER again to start syncing: '
 
 # Authorization
 profile = 'profile'
 username = ''
 password = ''
+my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
+login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
 
 
 def main():
+    set_cwd()
     welcome()
     login()
     assembler()
+    finish()
 
-# init program
+# Initiate program
 main()
-
