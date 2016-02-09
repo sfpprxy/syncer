@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import os
 import sys
 import time
+import traceback
 
 
 def set_cwd():
@@ -286,11 +287,18 @@ login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
 
 
 def main():
-    set_cwd()
-    welcome()
-    login()
-    assembler()
-
+    try:
+        set_cwd()
+        welcome()
+        login()
+        assembler()
+    except:
+        tb = traceback.format_exc()
+    finally:
+        with open('dump', 'w') as p:
+            p.write(tb)
+        print(tb)
+        input('Please check the error message')
 
 # Initiate program
 main()
