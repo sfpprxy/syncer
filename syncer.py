@@ -36,7 +36,6 @@ def login():
 
     def authorization():
         user = {'username': username, 'password': password}
-        login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
         global s
         s = requests.session()
         return s.post(login_action, data=user)
@@ -250,17 +249,22 @@ def assembler():
                     print('file existed...', file_name)
 
 
+def finish():
+    where = os.getcwd()
+    print('\nJob done!')
+    print('\nYou can find a module folder in ' + where + ' and your password is saved in profile.')
+    print('Exiting program in 5 seconds...')
+    time.sleep(5)
+
+
 # Welcome
-author = 'Joe Cui, study in Software Engineering. Email: cuiq4@uni.coventry.ac.uk'
+author = 'Joe Cui, study in Software Development. Email: cuiq4@uni.coventry.ac.uk'
 intro = '\nHi there, this is a simple tool that can automatically download/sync resources from Moodle ' \
           'and organize them in a clear way for you.\nIn a word, save you bunch of time!'
 make_clear = '\n\nThis tool will NOT collect any of your personal information.' \
              '\nYou can see the source code at https://github.com/sfpprxy/syncer'
 suggest = '\nIf you have any questions or suggestions, feel free to contact me :)\n'
 login_hint = '\nYou only need to login once, after that this tool will remember the password for you.'
-
-# Complete
-
 
 # Hints
 ask = '\nChoice module number(then hit ENTER): '
@@ -271,24 +275,20 @@ egg = '\n...gnihsarc ggE\n): laem a uoy yub lliw I em tcatnoc ,gge retsaE eht dn
 confirm = '\nDownloading files will take a minute, depends on your network. ' \
           'You can minimize this window while downloading. \n\nPress ENTER again to start syncing: '
 
-# Profile
-my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
-
 # Authorization
 profile = 'profile'
 username = ''
 password = ''
+my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
+login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
 
 
 def main():
-    # TODO: test on Windows, it will crash when syncing 'software engineering' - compiler 3.4 python
     set_cwd()
     welcome()
     login()
     assembler()
-    # TODO: give feedback and wait 3s then exit:
-    '''you can find a module folder in *path and your password is saved in profile'''
+    finish()
 
 # Initiate program
 main()
-
