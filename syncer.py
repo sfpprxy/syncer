@@ -11,7 +11,7 @@ def set_cwd():
 
 
 def welcome():
-    print(intro + make_clear + suggest + login_hint)
+    print(intro + make_clear + login_hint)
 
 
 def login():
@@ -68,12 +68,12 @@ def get_modules_list(url):
     link_list = []
     soup = parser(url)
     i = 1
-    print(0, '  ', 'Contact author')
+    print('', 0, ': ', 'Author Info')
     # locate module table
     for module in soup.find(id='current').find_all('a'):
         name = module.string
         link = module.get('href')
-        print(i, '  ', name)
+        print('', i, ': ', name)
         i += 1
         name_list.append(name)
         link_list.append(link)
@@ -100,7 +100,7 @@ def get_module_resource():
                 choice = int(input(ask)) - 1
                 if choice == -1:
                     u += 1
-                    print(author)
+                    print(author + suggest)
                 elif choice in range(len(get[0])):
                     module = get[0][choice]
                     link = get[1][choice]
@@ -247,33 +247,35 @@ def assembler():
                     downloader(file_url, file_path, file_name)
                 else:
                     print('file existed...', file_name)
+    finish()
 
 
 def finish():
     where = os.getcwd()
     print('\nJob done!')
     print('\nYou can find a module folder in ' + where + ' and your password is saved in profile.')
-    print('Exiting program in 10 seconds...')
-    time.sleep(10)
+    i = input("\nPress 'ENTER' to exit or press or Input 's' to sync another module:")
+    if i == 's':
+        assembler()
 
 
 # Welcome
-author = 'Joe Cui, study in Software Development. Email: cuiq4@uni.coventry.ac.uk'
+author = 'Joe Cui, study in Software Development. Email: cuiq4@uni.coventry.ac.uk' \
+         '\nYou can see the source code at https://github.com/sfpprxy/syncer'
 intro = '\nHi there, this is a simple tool that can automatically download/sync resources from Moodle ' \
           'and organize them in a clear way for you.\nIn a word, save you bunch of time!'
-make_clear = '\n\nThis tool will NOT collect any of your personal information.' \
-             '\nYou can see the source code at https://github.com/sfpprxy/syncer'
+make_clear = '\n\nThis tool will NOT collect any of your personal information.'
 suggest = '\nIf you have any questions or suggestions, feel free to contact me :)\n'
-login_hint = '\nYou only need to login once, after that this tool will remember the password for you.'
+login_hint = '\n\nYou only need to login once, after that this tool will remember the password for you.'
 
 # Hints
-ask = '\nChoice module number(then hit ENTER): '
+ask = '\nInput module number in list(then hit ENTER): '
 whoops = 'Whoops! It seems you input the wrong character.'
 please = 'Please input numbers in range :)'
 don = "Don't be too curious ;)"
 egg = '\n...gnihsarc ggE\n): laem a uoy yub lliw I em tcatnoc ,gge retsaE eht dnif uoY !woW\n'[::-1]
-confirm = '\nDownloading files will take a minute, depends on your network. ' \
-          'You can minimize this window while downloading. \n\nPress ENTER again to start syncing: '
+confirm = "\nDownloading files will take a minute, depends on your network. " \
+          "\n\nPress 'ENTER' again to confirm"
 
 # Authorization
 profile = 'profile'
@@ -288,7 +290,7 @@ def main():
     welcome()
     login()
     assembler()
-    finish()
+
 
 # Initiate program
 main()
