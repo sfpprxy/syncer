@@ -253,8 +253,8 @@ def finish():
     where = os.getcwd()
     print('\nJob done!')
     print('\nYou can find a module folder in ' + where + ' and your password is saved in profile.')
-    print('Exiting program in 5 seconds...')
-    time.sleep(5)
+    print('Exiting program in 10 seconds...')
+    time.sleep(10)
 
 
 # Welcome
