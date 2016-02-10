@@ -294,11 +294,13 @@ def main():
         assembler()
     except:
         tb = traceback.format_exc()
-    finally:
         with open('dump', 'w') as p:
             p.write(tb)
         print(tb)
-        input('Please check the error message')
+        print(author)
+        input('Unknow error occured. Please contact author, thank you!')
+    finally:
+        pass
 
 # Initiate program
 main()
