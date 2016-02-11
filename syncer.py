@@ -12,36 +12,36 @@ def set_cwd():
 
 
 def welcome():
-    print(intro + make_clear + login_hint)
+    print(INTRO + MAKE_CLEAR + LOGIN_HINT)
 
 
 def login():
     def input_user_info():
-        global username, password
-        username = input('\nEnter your Moodle username:')
-        password = input('Enter your Moodle password:')
-        if username == '' or password == '':
+        global USERNAME, PASSWORD
+        USERNAME = input('\nEnter your Moodle username:')
+        PASSWORD = input('Enter your Moodle password:')
+        if USERNAME == '' or PASSWORD == '':
             print('They can not be empty, please try again.')
             input_user_info()
 
     def save_user_info():
-        with open(profile, 'w') as p:
-            p.write(username + '\n' + password)
+        with open(PROFILE, 'w') as p:
+            p.write(USERNAME + '\n' + PASSWORD)
 
     def read_user_info():
-        global username, password
-        with open(profile) as p:
-            data = p.read().splitlines()
-        username = data[0]
-        password = data[1]
+        global USERNAME, PASSWORD
+        with open(PROFILE) as p:
+            user = p.read().splitlines()
+        USERNAME = user[0]
+        PASSWORD = user[1]
 
     def authorization():
-        user = {'username': username, 'password': password}
+        user = {'username': USERNAME, 'password': PASSWORD}
         global s
         s = requests.session()
-        return s.post(login_action, data=user)
+        return s.post(LOGIN_ACTION, data=user)
 
-    if os.path.isfile(profile):  # not first time use
+    if os.path.isfile(PROFILE):  # not first time use
         read_user_info()
     else:  # first time use
         input_user_info()
@@ -83,7 +83,7 @@ def get_modules_list(url):
 
 def get_module_resource():
     def choice_module():
-        get = get_modules_list(my_course)
+        get = get_modules_list(MY_COURSE)
         u = 0
         hit = 0
         for _ in range(16):
@@ -92,27 +92,27 @@ def get_module_resource():
                 hit += 1
                 i = hit
                 if i == 1:
-                    print(whoops)
+                    print(WHOOPS)
                 if i == 2:
-                    print(please)
+                    print(PLEASE)
                 if 2 < i < 16:
-                    print(don)
+                    print(DON)
             try:
-                choice = int(input(ask)) - 1
+                choice = int(input(ASK)) - 1
                 if choice == -1:
                     u += 1
-                    print(author + suggest)
+                    print(AUTHOR + SUGGEST)
                 elif choice in range(len(get[0])):
                     module = get[0][choice]
                     link = get[1][choice]
-                    input(confirm)
+                    input(CONFIRM)
                     return module, link
                 else:
                     hint()
             except ValueError:
                     hint()
             if hit + u == 15:
-                print(egg)
+                print(EGG)
                 time.sleep(3)
                 exit()
 
@@ -203,17 +203,17 @@ def downloader(url, path, file_name):
 
 # Sync resources and organize them properly
 def assembler():
-    data = get_module_resource()
+    module = get_module_resource()
 
     # create module folder
-    module_name = data[0]
+    module_name = module[0]
     if not os.path.exists(module_name):
         os.makedirs(module_name)
 
-    module_link = data[1]
+    module_link = module[1]
     downloader(module_link, module_name, 'This module page.html')
 
-    resource = data[2]
+    resource = module[2]
     for i in resource:
         sub_list = resource[resource.index(i)]
 
@@ -260,32 +260,33 @@ def finish():
         assembler()
 
 
-# Welcome
-author = 'Joe Cui, study in Software Development. Email: cuiq4@uni.coventry.ac.uk' \
+# WELCOME
+AUTHOR = 'Joe Cui, study in Software Development. Email: cuiq4@uni.coventry.ac.uk' \
          '\nYou can see the source code at https://github.com/sfpprxy/syncer'
-intro = '\nHi there, this is a simple tool that can automatically download/sync resources from Moodle ' \
+INTRO = '\nHi there, this is a simple tool that can automatically download/sync resources from Moodle ' \
           'and organize them in a clear way for you.\nIn a word, save you bunch of time!'
-make_clear = '\n\nThis tool will NOT collect any of your personal information.'
-suggest = '\nIf you have any questions or suggestions, feel free to contact me :)\n'
-login_hint = '\n\nYou only need to login once, after that this tool will remember the password for you.'
+MAKE_CLEAR = '\n\nThis tool will NOT collect any of your personal information.'
+SUGGEST = '\nIf you have any questions or suggestions, feel free to contact me :)\n'
+LOGIN_HINT = '\n\nYou only need to login once, after that this tool will remember the password for you.'
 
-# Hints
-ask = '\nInput module number in list(then hit ENTER): '
-whoops = 'Whoops! It seems you input the wrong character.'
-please = 'Please input numbers in range :)'
-don = "Don't be too curious ;)"
-egg = '\n...gnihsarc ggE\n): laem a uoy yub lliw I em tcatnoc ,gge retsaE eht dnif uoY !woW\n'[::-1]
-confirm = "\nDownloading files will take a minute, depends on your network. " \
+# HINTS
+ASK = '\nInput module number in list(then hit ENTER): '
+WHOOPS = 'Whoops! It seems you input the wrong character.'
+PLEASE = 'Please input numbers in range :)'
+DON = "Don't be too curious ;)"
+EGG = '\n...gnihsarc ggE\n): laem a uoy yub lliw I em tcatnoc ,gge retsaE eht dnif uoY !woW\n'[::-1]
+CONFIRM = "\nDownloading files will take a minute, depends on your network. " \
           "\n\nPress 'ENTER' again to confirm"
 
-# Authorization
-profile = 'profile'
-username = ''
-password = ''
-my_course = 'https://cumoodle.coventry.ac.uk/my/index.php'
-login_action = 'https://cumoodle.coventry.ac.uk/login/index.php'
+# AUTHORIZATION
+PROFILE = 'profile'
+USERNAME = ''
+PASSWORD = ''
+MY_COURSE = 'https://cumoodle.coventry.ac.uk/my/index.php'
+LOGIN_ACTION = 'https://cumoodle.coventry.ac.uk/login/index.php'
 
 
+# noinspection PyBroadException
 def main():
     try:
         set_cwd()
@@ -297,7 +298,7 @@ def main():
         with open('dump', 'w') as p:
             p.write(tb)
         print(tb)
-        print(author)
+        print(AUTHOR)
         input('Unknow error occured. Please contact author, thank you!')
     finally:
         pass
