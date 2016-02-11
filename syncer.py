@@ -97,6 +97,7 @@ def get_module_resource():
                     print(PLEASE)
                 if 2 < i < 16:
                     print(DON)
+
             try:
                 choice = int(input(ASK)) - 1
                 if choice == -1:
@@ -110,7 +111,7 @@ def get_module_resource():
                 else:
                     hint()
             except ValueError:
-                    hint()
+                hint()
             if hit + u == 15:
                 print(EGG)
                 time.sleep(3)
@@ -261,10 +262,10 @@ def finish():
 
 
 # WELCOME
-AUTHOR = 'Joe Cui, study in Software Development. Email: cuiq4@uni.coventry.ac.uk' \
-         '\nYou can see the source code at https://github.com/sfpprxy/syncer'
-INTRO = '\nHi there, this is a simple tool that can automatically download/sync resources from Moodle ' \
-          'and organize them in a clear way for you.\nIn a word, save you bunch of time!'
+AUTHOR = ('Joe Cui, study in Software Development. Email: cuiq4@uni.coventry.ac.uk'
+          '\nYou can see the source code at https://github.com/sfpprxy/syncer')
+INTRO = ('\nHi there, this is a simple tool that can automatically download/sync resources from Moodle '
+         'and organize them in a clear way for you.\nIn a word, save you bunch of time!')
 MAKE_CLEAR = '\n\nThis tool will NOT collect any of your personal information.'
 SUGGEST = '\nIf you have any questions or suggestions, feel free to contact me :)\n'
 LOGIN_HINT = '\n\nYou only need to login once, after that this tool will remember the password for you.'
@@ -275,8 +276,8 @@ WHOOPS = 'Whoops! It seems you input the wrong character.'
 PLEASE = 'Please input numbers in range :)'
 DON = "Don't be too curious ;)"
 EGG = '\n...gnihsarc ggE\n): laem a uoy yub lliw I em tcatnoc ,gge retsaE eht dnif uoY !woW\n'[::-1]
-CONFIRM = "\nDownloading files will take a minute, depends on your network. " \
-          "\n\nPress 'ENTER' again to confirm"
+CONFIRM = ("\nDownloading files will take a minute, depends on your network. "
+           "\n\nPress 'ENTER' again to confirm")
 
 # AUTHORIZATION
 PROFILE = 'profile'
@@ -302,6 +303,7 @@ def main():
         input('Unknow error occured. Please contact author, thank you!')
     finally:
         pass
+
 
 # Initiate program
 main()
